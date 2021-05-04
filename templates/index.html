@@ -83,6 +83,7 @@
                 tahun: tahunField.val(),
                 jumlah_pengguna_internet: jumlahPenggunaInternetField.val()
             });
+            dataset.sort('tahun', { order: "asc" })
             clearFields();
             refreshCallbacks();
         });
@@ -94,6 +95,7 @@
                 tahun: tahunField.val(),
                 jumlah_pengguna_internet: jumlahPenggunaInternetField.val()
             });
+            dataset.sort('tahun', { order: "asc" })
             clearFields();
             editBtn.hide();
             addBtn.show();
