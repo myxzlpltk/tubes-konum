@@ -2,4 +2,147 @@
 
 {% block title %}Masukkan Data{% endblock %}
 
-{% block body %}{% endblock %}
+{% block body %}
+    <div class="container py-5" id="dataset">
+        <p class="lead">Dataset</p>
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th class="sort" data-sort="tahun">Tahun</th>
+                    <th class="sort" data-sort="jumlah_pengguna_internet">Jumlah Pengguna Internet</th>
+                    <th colspan="2">
+                        <input type="text" class="form-control search" placeholder="Pencarian..." />
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="list">
+            {% for i in range(data.tahun | length) %}
+                <tr>
+                    <td class="id" style="display:none;">{{ i }}</td>
+                    <td class="tahun">{{ data.tahun[i] }}</td>
+                    <td class="jumlah_pengguna_internet">{{ data.jumlah_pengguna_internet[i] }}</td>
+                    <td class="edit"><button class="btn btn-warning btn-sm edit-item-btn">Edit</button></td>
+                    <td class="remove"><button class="btn btn-danger btn-sm remove-item-btn">Hapus</button></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="tahun">
+                        <input type="hidden" id="id-field" />
+                        <input type="number" class="form-control" id="tahun-field" placeholder="Tahun" />
+                    </td>
+                    <td class="jumlah_pengguna_internet">
+                        <input type="number" class="form-control" id="jumlah_pengguna_internet-field" placeholder="Jumlah Pengguna Internet" />
+                    </td>
+                    <td class="add" colspan="2">
+                        <button class="btn btn-primary" id="add-btn">Tambah</button>
+                        <button class="btn btn-warning" id="edit-btn">Edit</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <form action="/predictions" method="POST" id="predict">
+            <div class="form-group mb-3">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="">Tahun Awal Prediksi</label>
+                        <input type="number" class="form-control" name="min_year" placeholder="Tahun Awal" value="2021"/>
+                    </div>
+                    <div class="col-6">
+                        <label for="">Tahun Akhir Prediksi</label>
+                        <input type="number" class="form-control" name="max_year" placeholder="Tahun Akhir" value="2025"/>
+                    </div>
+                </div>
+            </div>
+            <div id="input-dataset"></div>
+            <button type="submit" class="btn btn-primary">Prediksi</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/listjs/list.js"></script>
+    <script>
+        var options = {valueNames: [ 'id', 'tahun', 'jumlah_pengguna_internet' ]};
+        var dataset = new List('dataset', options);
+        var idField = $('#id-field');
+        var tahunField = $('#tahun-field');
+        var jumlahPenggunaInternetField = $('#jumlah_pengguna_internet-field');
+        var addBtn = $('#add-btn');
+        var editBtn = $('#edit-btn').hide();
+        var removeBtns = $('.remove-item-btn');
+        var editBtns = $('.edit-item-btn');
+
+        refreshCallbacks();
+
+        addBtn.click(function() {
+            dataset.add({
+                id: Math.floor(Math.random()*110000),
+                tahun: tahunField.val(),
+                jumlah_pengguna_internet: jumlahPenggunaInternetField.val()
+            });
+            clearFields();
+            refreshCallbacks();
+        });
+
+        editBtn.click(function() {
+            var item = dataset.get('id', idField.val())[0];
+            item.values({
+                id: idField.val(),
+                tahun: tahunField.val(),
+                jumlah_pengguna_internet: jumlahPenggunaInternetField.val()
+            });
+            clearFields();
+            editBtn.hide();
+            addBtn.show();
+        });
+
+        function refreshCallbacks() {
+            // Needed to add new buttons to jQuery-extended object
+            removeBtns = $(removeBtns.selector);
+            editBtns = $(editBtns.selector);
+
+            removeBtns.click(function() {
+                var itemId = $(this).closest('tr').find('.id').text();
+                dataset.remove('id', itemId);
+            });
+
+            editBtns.click(function() {
+                var itemId = $(this).closest('tr').find('.id').text();
+                var itemValues = dataset.get('id', itemId)[0].values();
+                idField.val(itemValues.id);
+                tahunField.val(itemValues.tahun);
+                jumlahPenggunaInternetField.val(itemValues.jumlah_pengguna_internet);
+
+                editBtn.show();
+                addBtn.hide();
+            });
+        }
+
+        function clearFields() {
+            tahunField.val('');
+            jumlahPenggunaInternetField.val('');
+        }
+
+        $('#predict').submit(function predict(){
+            $('#predict #input-dataset input').remove();
+
+            dataset.toJSON().forEach(function (item){
+                $.each(item, (key, value) => {
+                    if(key !== 'id'){
+                        let field = $('<input/>')
+
+                        field.attr("type", "hidden")
+                        field.attr("name", key + "[]")
+                        field.attr("value", value)
+
+                        $('#predict').append(field)
+                    }
+                })
+            });
+            return true;
+        })
+    </script>
+{% endblock %}
