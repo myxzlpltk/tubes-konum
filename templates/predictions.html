@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Hasil Prediksi{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <h1 class="display-6 text-center mb-5">Hasil Prediksi</h1>
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tahun</th>
+                            <th>Jumlah Pengguna Internet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for i, row in data.iterrows() %}
+                        <tr>
+                            <td>{{ row['tahun'] }}</td>
+                            <td>{{ '{:n}'.format(row['jumlah_pengguna_internet']) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-auto">
+                <img src="data:image/png;base64,{{ plot }}" class="img-fluid mx-auto d-block" style="max-height: 350px">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
