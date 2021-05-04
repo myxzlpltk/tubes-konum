@@ -38,7 +38,7 @@ def predictions():
     result = pd.DataFrame({
         'tahun': range_predictions,
         'jumlah_pengguna_internet': [round(x) for x in predictions]
-    }).sort_values(by='tahun')
+    }).astype({'tahun': 'int64', 'jumlah_pengguna_internet': 'int64'}).sort_values(by='tahun')
 
     # Plot
     new_X = np.concatenate([X, range_predictions])
